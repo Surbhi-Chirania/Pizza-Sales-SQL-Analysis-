@@ -369,17 +369,15 @@ GROUP BY month;
 
 -- 25. What is the average time between orders throughout the day?
 
-SELECT 
-    AVG(time_diff) AS avg_time_between_orders_in_minutes
+SELECT order_date, AVG(time_diff) AS avg_time_between_orders_in_minutes
 FROM (
-    SELECT 
-        o.order_id,
-        TIMESTAMPDIFF(MINUTE, LAG(o.order_date) OVER (ORDER BY o.order_date), o.order_date) AS time_diff
-    FROM 
-        orders as o
+    SELECT o.order_date, 
+           TIMESTAMPDIFF(MINUTE, LAG(o.order_time) OVER (PARTITION BY o.order_date ORDER BY o.order_time), o.order_time) AS time_diff
+    FROM orders as o
 ) AS time_diffs
-WHERE 
-    time_diff IS NOT NULL;
+WHERE time_diff IS NOT NULL
+GROUP BY order_date
+ORDER BY order_date;
     
 -- 26. What is the distribution of order value (how many orders fall in low, medium, or high price ranges)?
 
